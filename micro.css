@@ -140,7 +140,7 @@ h2 {
     background-color: rgb(47, 47, 47, 0.7);
 }
 
-@media (min-height: 800px) {
+@media (min-height: 700px) {
     /* Styles for screens with a height of 800px or more */
     .frame {
         height: 80vh;

@@ -60,81 +60,43 @@ signIn.addEventListener("click", () => {
 })
 
 
-const signUpBtn = document.getElementById("signUpBtn");
-const signInBtn = document.getElementById("signInBtn");
+const signInBtn = document.getElementById("signInBtn")
+const signUpBtn = document.getElementById("signUpBtn")
 
-// Sign up form submission
-signUpBtn.addEventListener("click", async(event) => {
-    event.preventDefault(); // Prevent default form submission
-    const newUsername = document.getElementById("newUser").value;
-    const newPassword = document.getElementById("newPass").value;
-    const confirmPass = document.getElementById("confirmPass").value;
+signUpBtn.addEventListener("click", () => {
+    const username = document.getElementById('newUser').value;
+    const password = document.getElementById('newPass').value;
+    const confirmPassword = document.getElementById('confirmPass').value;
 
-    // Check if passwords match
-    if (newPassword !== confirmPass) {
-        alert("Passwords do not match!");
+    if (!username || !password || !confirmPassword) {
+        alert('Please fill in all fields!');
         return;
     }
 
-    const userData = {
-        username: newUsername,
-        password: newPassword
-    };
-
-    try {
-        const response = await fetch('http://127.0.0.1:5000/api/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-            alert(data.message); // Success message
-            // Redirect to sign-in page after successful signup
-            signUpForm.style.display = "none";
-            signInForm.style.display = "flex";
-        } else {
-            alert(data.message); // Error message
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while signing up.');
+    if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
     }
-});
 
-// Sign in form submission
-signInBtn.addEventListener("click", async(event) => {
-    event.preventDefault(); // Prevent default form submission
-    const username = document.getElementById("userName").value;
-    const password = document.getElementById("password").value;
-    const userData = {
-        username: username,
-        password: password
-    };
+    // Store user credentials in localStorage (simple approach)
+    localStorage.setItem('username', username);
+    localStorage.setItem('password', password);
 
-    try {
-        const response = await fetch('http://127.0.0.1:5000/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
+    alert('Signup successful! Please login.');
+    document.getElementById('signUpForm').reset();
+})
+signInBtn.addEventListener("click", (event) => {
+    event.preventDefault(); // Prevent form submission
+    const username = document.getElementById('userName').value;
+    const password = document.getElementById('password').value;
 
-        const data = await response.json();
-        if (response.ok) {
-            alert(data.message); // Success message
-            // Proceed with logged-in user actions
-            localStorage.setItem('username', username)
-            window.location.href = "micro-chat-bot.html"
-        } else {
-            alert(data.message); // Error message
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while logging in.');
+    // Retrieve stored credentials from localStorage
+    const storedUsername = localStorage.getItem('username');
+    const storedPassword = localStorage.getItem('password');
+
+    if (username === storedUsername && password === storedPassword) {
+        window.location.href = "micro-chat-bot.html";
+    } else {
+        alert('Invalid username or password!');
     }
 });

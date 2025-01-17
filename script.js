@@ -3,7 +3,9 @@ let botResponse;
 const userInput = document.getElementById("userInput");
 const chatFrame = document.querySelector(".chat-frame");
 const sendBtn = document.getElementById("btnSend");
-/* 
+const speakBtn = document.getElementById("btnSpeak");
+
+/* // Prevent opening developer tools and right-click menu
 document.addEventListener('keydown', function(event) {
     if (event.key === 'F12' || (event.ctrlKey && event.shiftKey && event.key === 'I')) {
         event.preventDefault();
@@ -12,32 +14,44 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener('contextmenu', function(event) {
     event.preventDefault();
-}); */
-
-
+});
+ */
+// Fetch response from API
 async function fetchResponse(query) {
     if (!query.trim()) {
         speakResponse("Please provide a query");
         return "Please provide a query";
     }
 
+    const url = "https://openrouter.ai/api/v1/chat/completions";
+    const apiKey = "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";
+
+    const payload = {
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: query }]
+    };
+
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/chat', {
+        const response = await fetch(url, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ query })
+            body: JSON.stringify(payload)
         });
 
+        if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+        }
+
         const data = await response.json();
-        return data.choices[0].message.content; // Process the response accordingly
+        return data.choices[0].message.content;
     } catch (error) {
-        console.error('Error:', error);
+        console.error(`Request failed: ${error}`);
         return "Request failed";
     }
 }
-
 
 let currentSpeech = null; // Track the current speech synthesis instance
 
@@ -46,14 +60,14 @@ sendBtn.addEventListener("click", async() => {
     if (!userQueryValue) return;
 
     // Display user's query
-    const userQuery = document.createElement("div");
+    userQuery = document.createElement("div");
     userQuery.classList.add("userQuery");
     userQuery.innerHTML = userQueryValue;
 
     userInput.value = "";
 
     // Display placeholder for bot response
-    const botResponse = document.createElement("div");
+    botResponse = document.createElement("div");
     botResponse.classList.add("botResponse");
     botResponse.innerHTML = "Generating...";
 
@@ -64,9 +78,9 @@ sendBtn.addEventListener("click", async() => {
     const response = await fetchResponse(userQueryValue);
     botResponse.innerHTML = response;
 
-    // If there's an ongoing speech, stop it
+    // Stop current speech if ongoing
     if (currentSpeech) {
-        window.speechSynthesis.cancel(); // Stop any current speech
+        window.speechSynthesis.cancel();
     }
 
     // Initialize speech synthesis for the new response
@@ -76,7 +90,7 @@ sendBtn.addEventListener("click", async() => {
     // Ensure voices are loaded
     const loadVoices = () =>
         new Promise((resolve) => {
-            let voices = synth.getVoices();
+            const voices = synth.getVoices();
             if (voices.length) {
                 resolve(voices);
             } else {
@@ -98,8 +112,7 @@ sendBtn.addEventListener("click", async() => {
     synth.speak(voice);
 });
 
-
-const speakBtn = document.getElementById('btnSpeak');
+// Speech-to-text functionality
 const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang = 'en-US';
 recognition.interimResults = true;
