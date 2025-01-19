@@ -24,8 +24,7 @@ async function fetchResponse(query) {
     }
 
     const url = "https://openrouter.ai/api/v1/chat/completions";
-    const apiKey = "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";
-
+    const apiKey = "";
     const payload = {
         model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: query }]
